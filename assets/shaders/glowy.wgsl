@@ -20,14 +20,24 @@ var texture_sampler: sampler;
 
 @fragment
 fn fragment(in: FragmentInput) -> @location(0) vec4<f32> {
-    var N = normalize(in.world_normal);
-//    return vec4(0.2, 0.2, 0.3 , 1.0);
-//      var output_color = vec4<f32>(in.uv,0.0,1.0);
+    var N  = normalize(in.world_normal);
+    var V = normalize(view.world_position.xyz - in.world_position.xyz);
 
-    var output_color = vec4<f32>(1.0,1.0,1.0,1.0);
-    var output_color = output_color * (textureSample(texture, texture_sampler, in.uv)* vec4<f32>(0.0,0.5,1.0,1.0));
-    var output_color = output_color + uniform_data.color;
+    let NdotV = max(dot(N,V), 0.0001);
 
-    return output_color;
+   let glow = pow(NdotV,2.0);
+   return vec4(vec3(glow),1.0);
 
 }
+//fn fragment_color(in: FragmentInput) -> @location(0) vec4<f32> {
+//    var N = normalize(in.world_normal);
+////    return vec4(0.2, 0.2, 0.3 , 1.0);
+////      var output_color = vec4<f32>(in.uv,0.0,1.0);
+//
+//    var output_color = vec4<f32>(1.0,1.0,1.0,1.0);
+//    var output_color = output_color * (textureSample(texture, texture_sampler, in.uv)* vec4<f32>(0.0,0.5,1.0,1.0));
+//    var output_color = output_color + uniform_data.color;
+//
+//    return output_color;
+//
+//}
