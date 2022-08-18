@@ -1,39 +1,75 @@
 use bevy::{
+    asset::AssetServerSettings,
     prelude::*,
     reflect::TypeUuid,
     render::render_resource::{self, AsBindGroup},
 };
 
+use bevy::window::{PresentMode, WindowMode};
+use bevy_inspector_egui::{WorldInspectorPlugin, Inspectable, RegisterInspectable};
+
 fn main() {
     App::new()
+        .insert_resource(AssetServerSettings{
+            watch_for_changes: true,
+            ..default()
+        })
+        .insert_resource(WindowDescriptor{
+
+            width: 800.0,
+            height: 600.0,
+            position: WindowPosition::At(Vec2::new(3500., 1500.)),
+            // position: WindowPosition::Centered(MonitorSelection::Number(2)),
+            resize_constraints: Default::default(),
+            scale_factor_override: None,
+            title: "Shaders!".to_string(),
+            present_mode: PresentMode::AutoVsync,
+            resizable: false,
+            decorations: false,
+            cursor_visible: true,
+            cursor_locked: false,
+            mode: WindowMode::Windowed,
+            transparent: false,
+            canvas: None,
+            fit_canvas_to_parent: false
+        })
         .add_plugins(DefaultPlugins)
+        .add_plugin(WorldInspectorPlugin::default())
         .add_plugin(MaterialPlugin::<GlowyMaterial>::default())
+        .insert_resource(AssetServerSettings {
+            watch_for_changes: true,
+            ..default()
+        })
+        .register_inspectable::<GlowyMaterial>()
         .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
-        .add_startup_system(setup)
+        .add_startup_system(sphere_setup)
         .add_startup_system(setup_lights)
         .run();
 }
 
-fn setup(
+fn sphere_setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut glow_materials: ResMut<Assets<GlowyMaterial>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let material = glow_materials.add(GlowyMaterial {});
 
-    commands.spawn().insert_bundle(MaterialMeshBundle {
-        mesh: meshes.add(Mesh::from(shape::UVSphere {
-            radius: 1.0,
+    commands.spawn()
+        .insert_bundle(MaterialMeshBundle {
+            mesh: meshes.add(Mesh::from(shape::UVSphere {
+                radius: 1.0,
+                ..default()
+            })),
+            // material: materials.add(StandardMaterial {
+            //     base_color: Color::GREEN,
+            //         ..default()
+            // }),
+            material: glow_materials.add(GlowyMaterial { color: Color::ALICE_BLUE }),
+            transform: Transform::from_xyz(0.0, 0.0, 0.0),
             ..default()
-        })),
-        // material: materials.add(StandardMaterial {
-        //     base_color: Color::GREEN,
-        //     ..default()
-        // }),
-        material,
-        transform: Transform::from_xyz(0.0, 0.0, 0.0),
-        ..default()
-    });
+            })
+        .insert(Name::new("Sphere"));
+
 }
 
 fn setup_lights(mut commands: Commands) {
@@ -52,9 +88,12 @@ fn setup_lights(mut commands: Commands) {
     });
 }
 
-#[derive(AsBindGroup, Debug, Clone, TypeUuid)]
+#[derive(AsBindGroup, Debug, Clone, TypeUuid, Inspectable,Reflect,Default)]
 #[uuid = "9d4bff0a-1ee6-11ed-861d-0242ac120002"]
-pub struct GlowyMaterial {}
+pub struct GlowyMaterial {
+    color: Color
+
+}
 
 impl Material for GlowyMaterial {
     fn fragment_shader() -> render_resource::ShaderRef {
