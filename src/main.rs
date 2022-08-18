@@ -17,17 +17,20 @@ fn main() {
 fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut glow_materials: ResMut<Assets<GlowyMaterial>>,
 ) {
+    let material = glow_materials.add(GlowyMaterial {});
+
     commands.spawn().insert_bundle(MaterialMeshBundle {
         mesh: meshes.add(Mesh::from(shape::UVSphere {
             radius: 1.0,
             ..default()
         })),
-        material: materials.add(StandardMaterial {
-            base_color: Color::GREEN,
-            ..default()
-        }),
+        // material: materials.add(StandardMaterial {
+        //     base_color: Color::GREEN,
+        //     ..default()
+        // }),
+        material,
         transform: Transform::from_xyz(0.0, 0.0, 0.0),
         ..default()
     });
