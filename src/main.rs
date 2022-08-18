@@ -41,6 +41,7 @@ fn main() {
             ..default()
         })
         .register_inspectable::<GlowyMaterial>()
+        .register_inspectable::<Handle<GlowyMaterial>>()
         .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
         .add_startup_system(sphere_setup)
         .add_startup_system(setup_lights)
@@ -52,6 +53,7 @@ fn sphere_setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut glow_materials: ResMut<Assets<GlowyMaterial>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    assets: Res<AssetServer>
 ) {
 
     commands.spawn()
@@ -64,7 +66,10 @@ fn sphere_setup(
             //     base_color: Color::GREEN,
             //         ..default()
             // }),
-            material: glow_materials.add(GlowyMaterial { color: Color::ALICE_BLUE }),
+            material: glow_materials.add(GlowyMaterial{
+                image: Some(assets.load("textures/splatter1.png")),
+                ..default()
+            }),
             transform: Transform::from_xyz(0.0, 0.0, 0.0),
             ..default()
             })
@@ -88,13 +93,24 @@ fn setup_lights(mut commands: Commands) {
     });
 }
 
-#[derive(AsBindGroup, Debug, Clone, TypeUuid, Inspectable,Reflect,Default)]
+#[derive(AsBindGroup, Debug, Clone, TypeUuid, Inspectable,Reflect)]
 #[uuid = "9d4bff0a-1ee6-11ed-861d-0242ac120002"]
 pub struct GlowyMaterial {
-    color: Color
-
+    #[uniform(0)]
+    color: Color,
+    #[texture(1)]
+    #[sampler(2)]
+    image: Option<Handle<Image>>
 }
 
+impl Default for GlowyMaterial {
+    fn default() -> Self {
+        Self {
+            color: Color::MIDNIGHT_BLUE,
+            image: default()
+        }
+    }
+}
 impl Material for GlowyMaterial {
     fn fragment_shader() -> render_resource::ShaderRef {
         "shaders/glowy.wgsl".into()
