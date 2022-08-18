@@ -23,10 +23,13 @@ fn fragment(in: FragmentInput) -> @location(0) vec4<f32> {
     var N  = normalize(in.world_normal);
     var V = normalize(view.world_position.xyz - in.world_position.xyz);
 
-    let NdotV = max(dot(N,V), 0.0001);
+    let NdotV = max(dot(N,V), 0.00001);
 
-   let glow = pow(NdotV,2.0);
-   return vec4(vec3(glow),1.0);
+   let glow_amt = 13.3;
+   let glow = pow(NdotV,glow_amt);
+
+   let color = mix(vec4(0.0,0.0,0.0,0.0),uniform_data.color , glow);
+   return vec4(color);
 
 }
 //fn fragment_color(in: FragmentInput) -> @location(0) vec4<f32> {
