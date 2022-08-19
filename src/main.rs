@@ -68,6 +68,7 @@ fn sphere_setup(
             // }),
             material: glow_materials.add(GlowyMaterial{
                 image: Some(assets.load("textures/splatter1.png")),
+                env_texture: Some(assets.load("textures/mountain_midday.hdr")),
                 ..default()
             }),
             transform: Transform::from_xyz(0.0, 0.0, 0.0),
@@ -100,14 +101,18 @@ pub struct GlowyMaterial {
     color: Color,
     #[texture(1)]
     #[sampler(2)]
-    image: Option<Handle<Image>>
+    image: Option<Handle<Image>>,
+    #[texture(3)]
+    #[sampler(4)]
+    env_texture: Option<Handle<Image>>
 }
 
 impl Default for GlowyMaterial {
     fn default() -> Self {
         Self {
             color: Color::MIDNIGHT_BLUE,
-            image: default()
+            image: default(),
+            env_texture: default()
         }
     }
 }
